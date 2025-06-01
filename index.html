@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Novel Chemy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-title {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .menu-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: none;
+        }
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: url('/api/placeholder/1200/800');
+        }
+
+        .characters-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .character {
+            position: absolute;
+            bottom: 0;
+            width: 300px;
+            height: 500px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom;
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .character.active {
+            opacity: 1;
+        }
+
+        .character.left {
+            left: 10%;
+        }
+
+        .character.center {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .character.right {
+            right: 10%;
+        }
+
+        .character.ian {
+            background-image: url('/api/placeholder/300/500');
+        }
+
+        .character.alisya {
+            background-image: url('/api/placeholder/300/500');
+        }
+
+        .ui-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            pointer-events: auto;
+        }
+
+        .dialog-box {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .speaker-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .dialog-text {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            flex-grow: 1;
+            min-height: 40px;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .choice-btn {
+            padding: 10px 15px;
+            background: rgba(76, 175, 80, 0.8);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .choice-btn:hover {
+            background: rgba(76, 175, 80, 1);
+            transform: translateX(5px);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .text-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .settings-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            display: none;
+            z-index: 500;
+            min-width: 300px;
+        }
+
+        .settings-item {
+            margin-bottom: 20px;
+        }
+
+        .settings-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .slider {
+            width: 100%;
+            height: 5px;
+            background: #ddd;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        .save-slots {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            display: none;
+            z-index: 500;
+            min-width: 400px;
+        }
+
+        .save-slot {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-slot:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .save-slot.empty {
+            color: #aaa;
+        }
+
+        .next-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.8);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .next-btn:hover {
+            background: rgba(76, 175, 80, 1);
+            transform: scale(1.1);
+        }
+
+        .next-btn.show {
+            display: block;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .character {
+                width: 200px;
+                height: 350px;
+            }
+            
+            .dialog-box {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                padding: 15px;
+                min-height: 100px;
+            }
+            
+            .controls {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Main Menu -->
+        <div class="main-menu" id="mainMenu">
+            <h1 class="game-title">Redoks Quest</h1>
+            <div class="menu-buttons">
+                <button class="menu-btn" onclick="startGame()">Mulai Game</button>
+                <button class="menu-btn" onclick="showLoadMenu()">Load Game</button>
+                <button class="menu-btn" onclick="showSettings()">Settings</button>
+                <button class="menu-btn" onclick="showCredits()">Credits</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="background" id="background"></div>
+            
+            <div class="characters-layer">
+                <div class="character ian left" id="characterIan"></div>
+                <div class="character alisya right" id="characterAlisya"></div>
+            </div>
+            
+            <div class="ui-layer">
+                <div class="dialog-box" id="dialogBox">
+                    <div class="speaker-name" id="speakerName"></div>
+                    <div class="dialog-text" id="dialogText"></div>
+                    <div class="choices" id="choices"></div>
+                    <div class="input-container" id="inputContainer" style="display: none;">
+                        <input type="text" class="text-input" id="textInput" placeholder="Ketik jawabanmu...">
+                        <button class="submit-btn" onclick="submitInput()">OK</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" onclick="showSettings()" title="Settings">⚙️</button>
+                <button class="control-btn" onclick="showSaveMenu()" title="Save">💾</button>
+                <button class="control-btn" onclick="showLoadMenu()" title="Load">📁</button>
+                <button class="control-btn" onclick="goToMenu()" title="Menu">🏠</button>
+            </div>
+            
+            <button class="next-btn" id="nextBtn" onclick="nextDialog()">▶</button>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settingsPanel">
+            <h3>Pengaturan</h3>
+            <div class="settings-item">
+                <label class="settings-label">Kecepatan Teks:</label>
+                <input type="range" class="slider" min="1" max="10" value="5" id="textSpeed" onchange="updateTextSpeed()">
+            </div>
+            <div class="settings-item">
+                <label class="settings-label">Auto-play:</label>
+                <input type="checkbox" id="autoPlay" onchange="updateAutoPlay()"> Aktifkan
+            </div>
+            <button class="menu-btn" onclick="closeSettings()">Tutup</button>
+        </div>
+
+        <!-- Save/Load Menu -->
+        <div class="save-slots" id="saveSlots">
+            <h3 id="saveLoadTitle">Save Game</h3>
+            <div id="slotsContainer"></div>
+            <button class="menu-btn" onclick="closeSaveLoad()">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            currentScene: 0,
+            currentDialog: 0,
+            playerName: '',
+            playerClass: '',
+            choices: {},
+            lastChoice: '',
+            progress: 0,
+            textSpeed: 50,
+            autoPlay: false,
+            isTyping: false
+        };
+
+        // Game Data - Scene 1
+        const gameData = {
+            scenes: [
+                {
+                    id: 'intro',
+                    background: '/api/placeholder/1200/800',
+                    dialogs: [
+                        {
+                            speaker: 'Ian',
+                            text: 'Halo! Aku Ian, siapa namamu?',
+                            character: 'ian',
+                            position: 'left',
+                            type: 'input',
+                            inputType: 'text',
+                            variable: 'playerName'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Wah! Oke, salam kenal {playerName}!',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Oke, kamu kelas berapa?',
+                            character: 'ian',
+                            position: 'left',
+                            type: 'input',
+                            inputType: 'number',
+                            variable: 'playerClass'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Oh, kelas {playerClass}!',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Kamu anak baru yang diminta ikut Science Club sama Bu Aisyah ya?',
+                            character: 'ian',
+                            position: 'left',
+                            type: 'choice',
+                            choices: [
+                                { text: 'Iya nih', value: 'yes' },
+                                { text: 'Terpaksa, sih', value: 'no' }
+                            ]
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: '',
+                            character: 'ian',
+                            position: 'left',
+                            conditional: true,
+                            conditions: {
+                                'yes': 'Kamu semangat banget, ya. Sampai ketemu di lab, deh!',
+                                'no': 'Waduh, sabar ya. Ngomong-ngomong nanti langsung ke lab ya!'
+                             }
+                        }
+                    ]
+                },
+                {
+                    id: 'lab_intro',
+                    background: '/api/placeholder/1200/800',
+                    dialogs: [
+                        {
+                            speaker: 'Ian',
+                            text: 'Hey, ketemu lagi {playerName}!',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Oh, iya, kenalin ini Alisya dari kelas A',
+                            character: 'ian',
+                            position: 'left',
+                            showCharacter: 'alisya'
+                        },
+                        {
+                            speaker: 'Alisya',
+                            text: 'Halo, aku Alisya, ketua Science Club. Kalau kamu butuh sesuatu, kamu bisa tanya aja ke aku',
+                            character: 'alisya',
+                            position: 'right'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Eh, lihat deh. Kayaknya gawat ini.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Duh... Kayaknya ada yang habis pakai lab Science club...',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: '...tapi bukannya anggota yang lain sudah nggak boleh ekskul lagi ya?',
+                            character: 'ian',
+                            position: 'left',
+                            type: 'choice',
+                            choices: [
+                                { text: 'Anggota lain?', value: 'members' },
+                                { text: 'Siapa yang nggak boleh ekskul?', value: 'who' }
+                            ]
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Jadi anggota lainnya itu anak kelas 12, karena sudah mau ujian, mereka nggak boleh ekskul.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Harusnya sih nggak ada lagi yang pakai lab Science Club ini.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Kalau praktikum Bu Aisyah pakai lab baru, terus disini juga dikunci sebelum kita datang.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Kalian kesini deh, lihat bekasnya.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Aduh, ini tabung reaksi masih ada isinya.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Alisya',
+                            text: 'Ini di bawah ada sisa besi, Ian! Di tabungnya ada sisa apa?',
+                            character: 'alisya',
+                            position: 'right'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Kayaknya hijau pekat terus ada endapannya, gitu.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Alisya',
+                            text: 'Hmm.... kalau misalnya itu besi bertemu asam kuat, menurutmu orang yang ninggalin ini habis praktik apa?',
+                            character: 'alisya',
+                            position: 'right',
+                        },
+                        {
+                            speaker: "player",
+                            text: '',
+                            character: '',
+                            position: '',
+                            type: 'choice',
+                            choices: [
+                                { 
+                                    text: 'Nyala warna?', 
+                                    value: 'flame', 
+                                    correct: false,
+                                    response: {
+                                        speaker: 'Ian',
+                                        text: 'Kayaknya nyala warna nggak di tabung reaksi gini, deh.'
+                                    }
+                                },
+                        
+                                    {
+                                        text: 'Redoks?', 
+                                        value: 'redox', 
+                                        correct: true,
+                                        response: {
+                                            speaker: 'Ian', 
+                                            text: 'Hmm... iya mungkin redoks.'
+                                        }
+                                    }
+                            ]
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Kayaknya kita perlu belajar redoks dulu deh sebelum bisa cari tahu siapa yang praktik di lab Science Club kemarin',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Sebelumnya apa kamu sudah belajar materi redoks?',
+                            character: 'ian',
+                            position: 'left',
+                            type: 'choice',
+                            choices: [
+                                { text: 'Sudah, dong!', value: 'yes' },
+                                { text: 'Belum sih.', value: 'no' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'redox_lesson',
+                    background: '/api/placeholder/1200/800',
+                    dialogs: [
+                        {
+                            speaker: 'Ian',
+                            text: 'Oke aku bantu jelaskan ya, redoks itu singkatan dari reduksi-oksidasi.',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Reaksi oksidasi itu contohnya seperti buah apel yang dikupas lalu didiamkan terbuka begitu saja dalam beberapa lama warnanya akan berubah menghitam kan?',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Nah itu terjadi karena apelnya mengikat oksigen dari udara, terus masuk deh ke dalam jaringan buah-buahan tersebut dan membuat jaringan sel di buah apelnya mengalami oksidasi.',
+                            character: 'ian',
+                            position: 'left',
+                            type: 'choice',
+                            choices: [
+                                { text: 'Jadi oksidasi itu reaksi pengikatan oksigen?', value: 'understand' }
+                            ]
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Betul! Oksidasi-narik oksigen. Gampang kan diingat?',
+                            character: 'ian',
+                            position: 'left'
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Tapi nggak semua reaksi oksidasi harus ada oksigennya. Nanti kita belajar lagi kok.',
+                            character: 'ian',
+                            position: 'left',
+                            type: 'choice',
+                            choices: [
+                                { text: 'Kalau reduksi itu apa?', value: 'ask_reduction' }
+                            ]
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Nah kalau reduksi itu reaksi yang melepaskan oksigen.',
+                            character: 'ian',
+                            position: 'left',
+                        },
+                        {
+                                speaker: 'Ian',
+                                text: 'Kira-kira kamu ada contoh nggak suatu reaksi yang melepaskan oksigen?',
+                                character: 'ian',
+                                position: 'left',
+                                type: 'quiz',
+                                quiz: {
+                                    question: 'Kira-kira kamu ada contoh nggak suatu reaksi yang melepaskan oksigen?',
+                                    options: [
+                                        { text: 'Pembakaran kertas hingga menjadi abu', correct: false },
+                                        { text: 'Fotosintesis tumbuhan', correct: true },
+                                        { text: 'Besi berkarat', correct: false }
+                                    ]
+                                }
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: '',
+                            character: 'ian',
+                            position: 'left',
+                            conditional: true,
+                            quizResult: true,
+                            conditions: {
+                                'correct': { 
+                                    text: 'Benar! Reaksi fotosintesis tumbuhan biasanya melepaskan oksigen',
+                                    showReaction: '6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂'
+                                },
+                                'incorrect': { 
+                                    text: 'Yah, salah! Kalau ada api pembakaran kan berarti perlu oksigen bukan melepaskan. Perkaratan juga perlu oksigen loh.'
+                                }
+                            }
+                        },
+                        {
+                            speaker: 'Ian',
+                            text: 'Nah karena ada pelepasan oksigen di reaksinya, jadi termasuk reaksi reduksi.',
+                            character: 'ian',
+                            position: 'left',
+                            showIf: 'quizCorrect'
+                        },
+                        {
+                            speaker: 'System',
+                            text: 'Game dapat disimpan di titik ini.',
+                            character: '',
+                            position: '',
+                            type: 'save_point'
+                        }
+                    ]
+                }
+            ]
+        };
+
+
+        // Initialize game
+        function init() {
+            loadSettings();
+            updateProgress();
+        }
+
+        // Core Game Functions
+        function startGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            gameState.currentScene = 0;
+            gameState.currentDialog = 0;
+            loadScene();
+        }
+
+        function loadScene() {
+            const scene = gameData.scenes[gameState.currentScene];
+            if (!scene) {
+                // Game finished
+                showGameComplete();
+                return;
+            }
+
+            // Set background
+            document.getElementById('background').style.backgroundImage = `url('${scene.background}')`;
+            
+            // Reset characters
+            document.querySelectorAll('.character').forEach(char => {
+                char.classList.remove('active');
+            });
+
+            // Update progress
+            updateProgress();
+            
+            // Load first dialog
+            loadDialog();
+        }
+
+        function loadDialog() {
+            const scene = gameData.scenes[gameState.currentScene];
+            const dialog = scene.dialogs[gameState.currentDialog];
+            
+            if (!dialog) {
+                // Scene ended, move to next scene
+                nextScene();
+                return;
+            }
+
+            // Hide all UI elements first
+            document.getElementById('choices').style.display = 'none';
+            document.getElementById('inputContainer').style.display = 'none';
+            document.getElementById('nextBtn').classList.remove('show');
+
+            // Handle conditional dialogs
+            if (dialog.conditional && dialog.conditions) {
+                const lastChoice = gameState.lastChoice;
+                if (lastChoice && dialog.conditions[lastChoice]) {
+                    dialog.text = dialog.conditions[lastChoice];
+                }
+            }
+
+            // Handle save point
+            if (dialog.type === 'save_point') {
+                autoSave();
+                typeText(dialog.text, () => {
+                    setTimeout(() => {
+                        showGameComplete();
+                    }, 2000);
+                });
+                return;
+            }
+
+            // Handle character display
+            if (dialog.character) {
+                showCharacter(dialog.character, dialog.position);
+            }
+
+            // Set speaker name
+            document.getElementById('speakerName').textContent = dialog.speaker;
+
+            // Process text with variables
+            let processedText = processText(dialog.text);
+
+            // Type the text
+            typeText(processedText, () => {
+                // After typing is complete
+                if (dialog.type === 'input') {
+                    showInput(dialog.inputType, dialog.variable);
+                } else if (dialog.type === 'choice') {
+                    showChoices(dialog.choices);
+                } else if (dialog.type === 'quiz') {
+                    showQuiz(dialog.quiz);
+                } else {
+                    // Show next button
+                    document.getElementById('nextBtn').classList.add('show');
+                    
+                    if (gameState.autoPlay) {
+                        setTimeout(() => {
+                            nextDialog();
+                        }, 2000);
+                    }
+                }
+            });
+        }
+
+        function processText(text) {
+            let processed = text;
+            processed = processed.replace(/{playerName}/g, gameState.playerName);
+            processed = processed.replace(/{playerClass}/g, gameState.playerClass);
+            return processed;
+        }
+
+        function typeText(text, callback) {
+            const textElement = document.getElementById('dialogText');
+            textElement.innerHTML = '';
+            gameState.isTyping = true;
+            
+            let index = 0;
+            const speed = 101 - (gameState.textSpeed * 10); // Convert to delay
+
+            function typeNextChar() {
+                if (index < text.length) {
+                    textElement.innerHTML += text.charAt(index);
+                    index++;
+                    setTimeout(typeNextChar, speed);
+                } else {
+                    gameState.isTyping = false;
+                    if (callback) callback();
+                }
+            }
+
+            typeNextChar();
+        }
+
+        function showCharacter(character, position) {
+            // Hide all characters first
+            document.querySelectorAll('.character').forEach(char => {
+                char.classList.remove('active');
+            });
+
+            // Show the specified character
+            const charElement = document.getElementById(`character${character.charAt(0).toUpperCase() + character.slice(1)}`);
+            if (charElement) {
+                charElement.classList.add('active');
+            }
+        }
+
+        function showInput(inputType, variable) {
+            const inputContainer = document.getElementById('inputContainer');
+            const textInput = document.getElementById('textInput');
+            
+            textInput.type = inputType;
+            textInput.value = '';
+            textInput.setAttribute('data-variable', variable);
+            
+            if (inputType === 'number') {
+                textInput.placeholder = 'Masukkan angka...';
+            } else {
+                textInput.placeholder = 'Ketik jawabanmu...';
+            }
+            
+            inputContainer.style.display = 'flex';
+            textInput.focus();
+            
+            // Add enter key support
+            textInput.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    submitInput();
+                }
+            };
+        }
+
+        function submitInput() {
+            const textInput = document.getElementById('textInput');
+            const value = textInput.value.trim();
+            const variable = textInput.getAttribute('data-variable');
+            
+            if (!value) return;
+            
+            // Store the input value
+            gameState[variable] = value;
+            
+            // Hide input container
+            document.getElementById('inputContainer').style.display = 'none';
+            
+            // Move to next dialog
+            nextDialog();
+        }
+
+        function showChoices(choices) {
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            choicesContainer.style.display = 'flex';
+            
+            choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.textContent = choice.text;
+                button.onclick = () => selectChoice(choice.value);
+                choicesContainer.appendChild(button);
+            });
+        function selectChoice(value) {
+            gameState.lastChoice = value;
+            gameState.choices[gameState.currentScene + '_' + gameState.currentDialog] = value;
+            
+            // Hide choices
+            document.getElementById('choices').style.display = 'none';
+            
+            // Move to next dialog
+            nextDialog();
+        }
+
+        // Show quiz function
+        function showQuiz(quiz) {
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            choicesContainer.style.display = 'flex';
+
+            // Show question
+            const questionElem = document.createElement('div');
+            questionElem.style.marginBottom = '10px';
+            questionElem.style.fontWeight = 'bold';
+            questionElem.textContent = quiz.question;
+            choicesContainer.appendChild(questionElem);
+
+            quiz.options.forEach((option, idx) => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.textContent = option.text;
+                button.onclick = () => selectQuizOption(option, quiz);
+                choicesContainer.appendChild(button);
+            });
+        }
+
+        function selectQuizOption(option, quiz) {
+            // Hide choices
+            document.getElementById('choices').style.display = 'none';
+
+            // Store quiz result
+            gameState.lastQuizCorrect = !!option.correct;
+
+            // Find the next dialog (should be conditional with quizResult)
+            const scene = gameData.scenes[gameState.currentScene];
+            const dialogs = scene.dialogs;
+            const nextDialogIdx = gameState.currentDialog + 1;
+            const nextDialog = dialogs[nextDialogIdx];
+
+            if (nextDialog && nextDialog.conditional && nextDialog.quizResult && nextDialog.conditions) {
+                let resultKey = option.correct ? 'correct' : 'incorrect';
+                let result = nextDialog.conditions[resultKey];
+                let text = result.text || '';
+                let showReaction = result.showReaction || '';
+
+                // Show feedback text
+                typeText(text + (showReaction ? `<br><b>${showReaction}</b>` : ''), () => {
+                    // Move to next dialog after feedback
+                    gameState.currentDialog += 2; // skip feedback dialog
+                    updateProgress();
+                    loadDialog();
+                });
+            } else {
+                // fallback: just go to next dialog
+                nextDialog();
+            }
+        }
+            nextDialog();
+        }
+
+        function nextDialog() {
+            if (gameState.isTyping) return; // Don't advance while typing
+            
+            gameState.currentDialog++;
+            updateProgress();
+            loadDialog();
+        }
+
+        function nextScene() {
+            gameState.currentScene++;
+            gameState.currentDialog = 0;
+            
+            if (gameState.currentScene < gameData.scenes.length) {
+                loadScene();
+            } else {
+                showGameComplete();
+            }
+        }
+
+        function updateProgress() {
+            const totalDialogs = gameData.scenes.reduce((total, scene) => total + scene.dialogs.length, 0);
+            const currentProgress = gameData.scenes.slice(0, gameState.currentScene).reduce((total, scene) => total + scene.dialogs.length, 0) + gameState.currentDialog;
+            const percentage = (currentProgress / totalDialogs) * 100;
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            gameState.progress = percentage;
+        }
+
+        function showGameComplete() {
+            document.getElementById('dialogBox').innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <h2 style="color: #4CAF50; margin-bottom: 15px;">🎉 Scene 1 Selesai!</h2>
+                    <p style="margin-bottom: 15px;">Terima kasih telah memainkan Scene 1 dari Redoks Quest!</p>
+                    <p style="margin-bottom: 20px;">Scene selanjutnya akan segera hadir...</p>
+                    <button class="menu-btn" onclick="goToMenu()" style="margin: 5px;">Kembali ke Menu</button>
+                    <button class="menu-btn" onclick="restartGame()" style="margin: 5px;">Main Lagi</button>
+                </div>
+            `;
+        }
+
+        // UI Functions
+        function goToMenu() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+        }
+
+        function restartGame() {
+            gameState = {
+                currentScene: 0,
+                currentDialog: 0,
+                playerName: '',
+                playerClass: '',
+                choices: {},
+                lastChoice: '',
+                progress: 0,
+                textSpeed: gameState.textSpeed,
+                autoPlay: gameState.autoPlay,
+                isTyping: false
+            };
+            startGame();
+        }
+
+        function showSettings() {
+            document.getElementById('settingsPanel').style.display = 'block';
+            document.getElementById('textSpeed').value = gameState.textSpeed / 10;
+            document.getElementById('autoPlay').checked = gameState.autoPlay;
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsPanel').style.display = 'none';
+        }
+
+        function updateTextSpeed() {
+            gameState.textSpeed = document.getElementById('textSpeed').value * 10;
+            saveSettings();
+        }
+
+        function updateAutoPlay() {
+            gameState.autoPlay = document.getElementById('autoPlay').checked;
+            saveSettings();
+        }
+
+        function showSaveMenu() {
+            document.getElementById('saveLoadTitle').textContent = 'Save Game';
+            showSaveSlots('save');
+        }
+
+        function showLoadMenu() {
+            document.getElementById('saveLoadTitle').textContent = 'Load Game';
+            showSaveSlots('load');
+        }
+
+        function showSaveSlots(mode) {
+            const slotsContainer = document.getElementById('slotsContainer');
+            slotsContainer.innerHTML = '';
+            
+            for (let i = 1; i <= 3; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'save-slot';
+                
+                const savedData = localStorage.getItem(`redoks_save_${i}`);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    slot.innerHTML = `
+                        <strong>Slot ${i}</strong><br>
+                        Player: ${data.playerName || 'Unknown'}<br>
+                        Progress: ${Math.round(data.progress)}%<br>
+                        <small>Saved: ${new Date(data.timestamp).toLocaleString()}</small>
+                    `;
+                } else {
+                    slot.innerHTML = `<strong>Slot ${i}</strong><br><em>Empty</em>`;
+                    slot.classList.add('empty');
+                }
+                
+                if (mode === 'save') {
+                    slot.onclick = () => saveGame(i);
+                } else {
+                    if (savedData) {
+                        slot.onclick = () => loadGame(i);
+                    }
+                }
+                
+                slotsContainer.appendChild(slot);
+            }
+            
+            document.getElementById('saveSlots').style.display = 'block';
+        }
+
+        function closeSaveLoad() {
+            document.getElementById('saveSlots').style.display = 'none';
+        }
+
+        function saveGame(slot) {
+            const saveData = {
+                ...gameState,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem(`redoks_save_${slot}`, JSON.stringify(saveData));
+            closeSaveLoad();
+            
+            // Show confirmation
+            const originalText = document.getElementById('dialogText').innerHTML;
+            document.getElementById('dialogText').innerHTML = `✅ Game tersimpan di Slot ${slot}!`;
+            setTimeout(() => {
+                document.getElementById('dialogText').innerHTML = originalText;
+            }, 2000);
+        }
+
+        function loadGame(slot) {
+            const savedData = localStorage.getItem(`redoks_save_${slot}`);
+            if (savedData) {
+                gameState = JSON.parse(savedData);
+                closeSaveLoad();
+                
+                // Start from saved position
+                document.getElementById('mainMenu').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'block';
+                loadScene();
+            }
+        }
+
+        function autoSave() {
+            const saveData = {
+                ...gameState,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('redoks_autosave', JSON.stringify(saveData));
+        }
+
+        function saveSettings() {
+            const settings = {
+                textSpeed: gameState.textSpeed,
+                autoPlay: gameState.autoPlay
+            };
+            localStorage.setItem('redoks_settings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            const settings = localStorage.getItem('redoks_settings');
+            if (settings) {
+                const data = JSON.parse(settings);
+                gameState.textSpeed = data.textSpeed || 50;
+                gameState.autoPlay = data.autoPlay || false;
+            }
+        }
+
+        function showCredits() {
+            alert('Redoks Quest\n\nGame Visual Novel Pembelajaran Kimia\nDibuat untuk Guru dan Siswa\n\n© 2024');
+        }
+
+        // Initialize when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
