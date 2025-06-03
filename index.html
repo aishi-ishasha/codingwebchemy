@@ -100,8 +100,8 @@
         .character {
             position: absolute;
             bottom: 0;
-            width: 300px;
-            height: 500px;
+            width: 150px;
+            height: 150px;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: bottom;
@@ -126,12 +126,28 @@
             right: 10%;
         }
 
-        .character.ian {
-            background-image: url('/api/placeholder/300/500');
+        .character.ian_normal {
+            background-image: url('/images/ian/Ian_smile.png');
         }
 
-        .character.alisya {
-            background-image: url('/api/placeholder/300/500');
+        .character.ian_sad {
+            background-image: url('/images/ian/Ian_sad');
+        }
+
+        .character.ian_wow {
+            background-image: url('/images/ian/Ian_wow.png');
+        }
+
+        .character.alisya_normal {
+            background-image: url('/images/alisya/Alisya_happy.png');
+        }
+        
+        .character.alisya_blush {
+            background-image: url('/images/alisya/Alisya_happy_blush.png');
+        }
+
+        .character.alisya_sad {
+            background-image: url('/images/alisya/Alisyadefault.png');
         }
 
         .ui-layer {
@@ -479,12 +495,12 @@
             scenes: [
                 {
                     id: 'intro',
-                    background: '/api/placeholder/1200/800',
+                    background: '/images/classroom.jpg',
                     dialogs: [
                         {
                             speaker: 'Ian',
                             text: 'Halo! Aku Ian, siapa namamu?',
-                            character: 'ian',
+                            character: 'ian_normal',
                             position: 'left',
                             type: 'input',
                             inputType: 'text',
@@ -493,13 +509,13 @@
                         {
                             speaker: 'Ian',
                             text: 'Wah! Oke, salam kenal {playerName}!',
-                            character: 'ian',
+                            character: 'ian_wow',
                             position: 'left'
                         },
                         {
                             speaker: 'Ian',
                             text: 'Oke, kamu kelas berapa?',
-                            character: 'ian',
+                            character: 'ian_normal',
                             position: 'left',
                             type: 'input',
                             inputType: 'number',
@@ -508,13 +524,13 @@
                         {
                             speaker: 'Ian',
                             text: 'Oh, kelas {playerClass}!',
-                            character: 'ian',
+                            character: 'ian_wow',
                             position: 'left'
                         },
                         {
                             speaker: 'Ian',
                             text: 'Kamu anak baru yang diminta ikut Science Club sama Bu Aisyah ya?',
-                            character: 'ian',
+                            character: 'ian_normal',
                             position: 'left',
                             type: 'choice',
                             choices: [
@@ -525,13 +541,18 @@
                         {
                             speaker: 'Ian',
                             text: '',
-                            character: 'ian',
                             position: 'left',
                             conditional: true,
                             conditions: {
-                                'yes': 'Kamu semangat banget, ya. Sampai ketemu di lab, deh!',
-                                'no': 'Waduh, sabar ya. Ngomong-ngomong nanti langsung ke lab ya!'
-                             }
+                                'yes': {
+                                    text: 'Kamu semangat banget, ya. Sampai ketemu di lab, deh!',
+                                    character: 'ian_normal'
+                                },
+                                'no': {
+                                    text: 'Waduh, sabar ya. Ngomong-ngomong nanti langsung ke lab ya!',
+                                    character: 'ian_sad'
+                                }
+                            }
                         }
                     ]
                 },
