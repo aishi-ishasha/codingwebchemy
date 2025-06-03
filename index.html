@@ -127,27 +127,27 @@
         }
 
         .character.ian_normal {
-            background-image: url('/images/ian/Ian_smile.png');
+            background-image: url('/images/ian_smile.png'); 
         }
 
         .character.ian_sad {
-            background-image: url('/images/ian/Ian_sad');
+            background-image: url('/images/ian_sad');
         }
 
         .character.ian_wow {
-            background-image: url('/images/ian/Ian_wow.png');
+            background-image: url('/images/ian_wow.png');
         }
 
         .character.alisya_normal {
-            background-image: url('/images/alisya/Alisya_happy.png');
+            background-image: url('/images/alisya_happy.png');
         }
         
         .character.alisya_blush {
-            background-image: url('/images/alisya/Alisya_happy_blush.png');
+            background-image: url('/images/alisya_happy_blush.png');
         }
 
         .character.alisya_sad {
-            background-image: url('/images/alisya/Alisyadefault.png');
+            background-image: url('/images/alisya_sad.png');
         }
 
         .ui-layer {
@@ -495,7 +495,7 @@
             scenes: [
                 {
                     id: 'intro',
-                    background: '/images/classroom.jpg',
+                    background: 'images/classroom.jpg',
                     dialogs: [
                         {
                             speaker: 'Ian',
@@ -541,6 +541,7 @@
                         {
                             speaker: 'Ian',
                             text: '',
+                            character: '',
                             position: 'left',
                             conditional: true,
                             conditions: {
@@ -558,7 +559,7 @@
                 },
                 {
                     id: 'lab_intro',
-                    background: '/api/placeholder/1200/800',
+                    background: '/images/labsianghari.jpg',
                     dialogs: [
                         {
                             speaker: 'Ian',
@@ -931,18 +932,37 @@
             typeNextChar();
         }
 
-        function showCharacter(character, position) {
-            // Hide all characters first
-            document.querySelectorAll('.character').forEach(char => {
-                char.classList.remove('active');
-            });
+            const characterImages = {
+                'ian_normal': 'images/ian_smile.png',
+                'ian_wow': 'images/ian_wow.png', 
+                'ian_sad': 'images/ian_sad.png',
+                'ian': 'images/ian_smile.png', // Default Ian
+                'alisya_normal': 'images/alisya_happy.png',
+                'alisya_blush': 'images/alisya_happy_blush.png',
+                'alisya_sad': 'images/alisya_sad.png',
+                'alisya': 'images/alisya_happy.png' // Default Alisya
+            };
 
-            // Show the specified character
-            const charElement = document.getElementById(`character${character.charAt(0).toUpperCase() + character.slice(1)}`);
-            if (charElement) {
-                charElement.classList.add('active');
+            function showCharacter(character, position) {
+                // Hide all characters first
+                document.querySelectorAll('.character').forEach(char => {
+                    char.classList.remove('active');
+                });
+
+                // Get image path
+                const imagePath = characterImages[character];
+                if (!imagePath) return;
+    
+                // Determine character name for element ID
+                const characterName = character.startsWith('ian_') ? 'Ian' : 'Alisya';
+    
+                // Show the character element  
+                const charElement = document.getElementById(`character${characterName}`);
+                if (charElement) {
+                    charElement.style.backgroundImage = `url('${imagePath}')`;
+                    charElement.className = `character ${position} active`;
+                }
             }
-        }
 
         function showInput(inputType, variable) {
             const inputContainer = document.getElementById('inputContainer');
