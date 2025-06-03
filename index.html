@@ -99,9 +99,9 @@
 
         .character {
             position: absolute;
-            bottom: 0;
-            width: 150px;
-            height: 150px;
+            bottom: 180px;
+            width: 300px;
+            height: 350px;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: bottom;
@@ -114,7 +114,7 @@
         }
 
         .character.left {
-            left: 10%;
+            left: 3%;
         }
 
         .character.center {
@@ -164,11 +164,11 @@
             bottom: 20px;
             left: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            background: #2e5256;
             border-radius: 15px;
             padding: 20px;
             color: white;
-            min-height: 120px;
+            height: 160px;
             display: flex;
             flex-direction: column;
         }
@@ -381,15 +381,15 @@
             
             .character {
                 width: 200px;
-                height: 350px;
+                height: 150px;
             }
             
             .dialog-box {
-                left: 10px;
-                right: 10px;
-                bottom: 10px;
-                padding: 15px;
-                min-height: 100px;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
+                padding: 5px;
+                min-height: 0px;
             }
             
             .controls {
@@ -540,8 +540,8 @@
                         },
                         {
                             speaker: 'Ian',
-                            text: '',
-                            character: '',
+                            text: 'response berdasarkan pilihan',
+                            character: 'ian_normal',
                             position: 'left',
                             conditional: true,
                             conditions: {
@@ -559,7 +559,7 @@
                 },
                 {
                     id: 'lab_intro',
-                    background: '/images/labsianghari.jpg',
+                    background: 'images/labsianghari.jpg',
                     dialogs: [
                         {
                             speaker: 'Ian',
@@ -583,19 +583,19 @@
                         {
                             speaker: 'Ian',
                             text: 'Eh, lihat deh. Kayaknya gawat ini.',
-                            character: 'ian',
+                            character: 'ian_sad',
                             position: 'left'
                         },
                         {
                             speaker: 'Ian',
                             text: 'Duh... Kayaknya ada yang habis pakai lab Science club...',
-                            character: 'ian',
+                            character: 'ian_sad',
                             position: 'left'
                         },
                         {
                             speaker: 'Ian',
                             text: '...tapi bukannya anggota yang lain sudah nggak boleh ekskul lagi ya?',
-                            character: 'ian',
+                            character: 'ian_sad',
                             position: 'left',
                             type: 'choice',
                             choices: [
@@ -855,7 +855,11 @@
             if (dialog.conditional && dialog.conditions) {
                 const lastChoice = gameState.lastChoice;
                 if (lastChoice && dialog.conditions[lastChoice]) {
-                    dialog.text = dialog.conditions[lastChoice];
+                    const condition = dialog.conditions[lastChoice];
+                    dialog.text = condition.text;          // ← Perbaiki ini
+                    if (condition.character) {
+                        dialog.character = condition.character;
+                    }
                 }
             }
 
